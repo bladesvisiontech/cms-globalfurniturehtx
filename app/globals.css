@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #0f0f0f;
+  --color-card: #1a1a1a;
+  --color-border: #2a2a2a;
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+  --color-text: #e5e5e5;
+  --color-muted: #888888;
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+}
+
+@layer base {
+  html, body {
+    @apply bg-surface text-text;
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  input, textarea, select {
+    @apply bg-card border border-border text-text rounded-md px-3 py-2 w-full;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--color-accent);
+  }
+
+  label {
+    @apply text-muted text-xs uppercase tracking-wider block mb-1.5;
+  }
+}
