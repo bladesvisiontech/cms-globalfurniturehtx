@@ -28,11 +28,21 @@ export default function CategoriesPage() {
     setToast(result.ok ? { message: 'Categories saved! Publishing now...', type: 'success' } : { message: result.error ?? 'Failed', type: 'error' });
   }, [data]);
 
-  function update(i: number, field: keyof Category, value: string) {
+  function update(i: number, field: keyof Category, value: string | number) {
     if (!data) return;
     const updated = [...data.categories];
     updated[i] = { ...updated[i], [field]: value };
     setData({ ...data, categories: updated });
+  }
+
+  function add() {
+    if (!data) return;
+    setData({ ...data, categories: [...data.categories, { id: `cat-${Date.now()}`, name: '', slug: '', description: '', image: '', order: data.categories.length + 1 }] });
+  }
+
+  function remove(i: number) {
+    if (!data || !confirm('Remove this category?')) return;
+    setData({ ...data, categories: data.categories.filter((_, idx) => idx !== i) });
   }
 
   if (!data) return <div className="text-muted text-sm">Loading...</div>;
@@ -43,16 +53,26 @@ export default function CategoriesPage() {
         <PageHeader title="Categories" description="Product categories shown on the homepage" />
         <SaveButton saving={saving} onClick={save} />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {data.categories.map((cat, i) => (
-          <section key={cat.id} className="bg-card border border-border rounded-lg p-5">
-            <ImagePicker label={cat.name} value={cat.image} onChange={url => update(i, 'image', url)} siteUrl={SITE_URL} />
-            <div className="mt-3 space-y-2">
-              <div><label>Name</label><input value={cat.name} onChange={e => update(i, 'name', e.target.value)} /></div>
-              <div><label>Description</label><textarea rows={2} value={cat.description} onChange={e => update(i, 'description', e.target.value)} /></div>
-            </div>
-          </section>
-        ))}
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <button onClick={add} className="text-accent text-sm hover:underline">+ Add category</button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {data.categories.map((cat, i) => (
+            <section key={cat.id} className="bg-card border border-border rounded-lg p-5">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xs text-muted uppercase tracking-wider">Category {i + 1}</span>
+                <button onClick={() => remove(i)} className="text-danger text-xs hover:underline">Remove</button>
+              </div>
+              <ImagePicker label="Category Image" value={cat.image} onChange={url => update(i, 'image', url)} siteUrl={SITE_URL} />
+              <div className="mt-3 space-y-2">
+                <div><label>Name</label><input value={cat.name} onChange={e => update(i, 'name', e.target.value)} /></div>
+                <div><label>Slug (URL)</label><input value={cat.slug} onChange={e => update(i, 'slug', e.target.value)} /></div>
+                <div><label>Description</label><textarea rows={2} value={cat.description} onChange={e => update(i, 'description', e.target.value)} /></div>
+              </div>
+            </section>
+          ))}
+        </div>
       </div>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

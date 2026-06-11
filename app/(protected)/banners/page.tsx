@@ -28,11 +28,25 @@ export default function BannersPage() {
     setToast(result.ok ? { message: 'Banners saved! Publishing now...', type: 'success' } : { message: result.error ?? 'Failed', type: 'error' });
   }, [data]);
 
-  function update(i: number, field: keyof Banner, value: string | boolean) {
+  function update(i: number, field: keyof Banner, value: string | boolean | number) {
     if (!data) return;
     const updated = [...data.banners];
     updated[i] = { ...updated[i], [field]: value };
     setData({ ...data, banners: updated });
+  }
+
+  function add() {
+    if (!data) return;
+    const newBanner: Banner = {
+      id: `banner-${Date.now()}`, title: '', subtitle: '', imageUrl: '',
+      ctaText: 'Shop Now', ctaLink: '/shop', order: data.banners.length + 1, active: true
+    };
+    setData({ ...data, banners: [...data.banners, newBanner] });
+  }
+
+  function remove(i: number) {
+    if (!data || !confirm('Remove this banner?')) return;
+    setData({ ...data, banners: data.banners.filter((_, idx) => idx !== i) });
   }
 
   if (!data) return <div className="text-muted text-sm">Loading...</div>;
@@ -44,14 +58,20 @@ export default function BannersPage() {
         <SaveButton saving={saving} onClick={save} />
       </div>
       <div className="space-y-6">
+        <div className="flex justify-end">
+          <button onClick={add} className="text-accent text-sm hover:underline">+ Add banner</button>
+        </div>
         {data.banners.map((b, i) => (
           <section key={b.id} className="bg-card border border-border rounded-lg p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-sm font-semibold text-text">Banner {i + 1}</h2>
-              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
-                <input type="checkbox" checked={b.active} onChange={e => update(i, 'active', e.target.checked)} className="w-4 h-4" />
-                Active
-              </label>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
+                  <input type="checkbox" checked={b.active} onChange={e => update(i, 'active', e.target.checked)} className="w-4 h-4" />
+                  Active
+                </label>
+                <button onClick={() => remove(i)} className="text-danger text-xs hover:underline">Remove</button>
+              </div>
             </div>
             <div className="space-y-3">
               <div><label>Title</label><input value={b.title} onChange={e => update(i, 'title', e.target.value)} /></div>
